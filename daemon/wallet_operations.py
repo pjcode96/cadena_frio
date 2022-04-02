@@ -1,7 +1,8 @@
 from eth_account import Account
-import wallet
+from wallet import Wallet
 from os.path import exists
 import secrets
+
 
 def getNewPrivateKey():
     secret = secrets.token_hex(32)
@@ -16,8 +17,8 @@ def getNewAccountAddress(private_key):
 
 def saveNewAccountAddressInFile(account_address):
     try:
-        file = open("../private/count_address", "w")
-        file.write(account_address)
+        file = open("../private/account_address", "w")
+        file.write(account_address.address)
         file.close()
         return True
     except:
@@ -31,7 +32,7 @@ def saveNewPrivateKeyInFile(private_key):
     except:
         print("Error, can't write on the especified path")
 
-def getDataFromFiles():
+def getPrivateKeyAndAccountAddressDataFromFiles():
 
     file = open("../private/private_key")
     private_key = file.read()
@@ -52,7 +53,7 @@ account_address = None;
 file_exists = exists("../private/private_key")
 
 if file_exists:
-    data = getDataFromFiles()
+    data = getPrivateKeyAndAccountAddressDataFromFiles()
     private_key = data["private_key"]
     account_address = data["account_address"]
 
@@ -62,4 +63,6 @@ else:
 
     account_address = getNewAccountAddress(private_key)
     saveNewAccountAddressInFile(account_address)
+
+wallet = Wallet(private_key, account_address)
     
