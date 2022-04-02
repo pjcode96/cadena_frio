@@ -10,4 +10,4 @@ build
 # environment variables
 .env
 
-./private
+private
