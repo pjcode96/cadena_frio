@@ -1,8 +1,8 @@
 from eth_account import Account
-from wallet import Wallet
 from os.path import exists
 import secrets
 
+# FUNCTION DEFINITIONS
 
 def getNewPrivateKey():
     secret = secrets.token_hex(32)
@@ -40,15 +40,29 @@ def getPrivateKeyAndAccountAddressDataFromFiles():
     file = open("../private/account_address")
     account_address = file.read()
 
-    data = {
+    walletData = {
         "private_key": private_key,
         "account_address": account_address
     }
+    return walletData
 
-    return data
+def createNewWallet():
+    private_key = getNewPrivateKey()
+    saveNewPrivateKeyInFile(private_key)
 
-private_key = None;
-account_address = None;
+    account_address = getNewAccountAddress(private_key)
+    saveNewAccountAddressInFile(account_address)
+
+    walletData = {
+        "private_key": private_key,
+        "account_address": account_address
+    }
+    
+    return walletData
+
+# SCRIPT
+private_key = None
+account_address = None
 
 file_exists = exists("../private/private_key")
 
@@ -56,13 +70,7 @@ if file_exists:
     data = getPrivateKeyAndAccountAddressDataFromFiles()
     private_key = data["private_key"]
     account_address = data["account_address"]
+    print("Hola:", private_key, account_address)
 
 else:
-    private_key = getNewPrivateKey()
-    saveNewPrivateKeyInFile(private_key)
-
-    account_address = getNewAccountAddress(private_key)
-    saveNewAccountAddressInFile(account_address)
-
-wallet = Wallet(private_key, account_address)
-    
+    walletData = createNewWallet()
