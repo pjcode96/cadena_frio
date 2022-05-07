@@ -2,19 +2,23 @@
 
 pragma solidity >=0.7.0 <0.9.0;
 
-import "./Ownable.sol";
+import "./SensorFactory.sol";
 
-contract Temperature is Ownable{
+contract Sensor is SensorFactory{
+    //TODO
+    /*
+    Añadir responsable,
+    checkpoints,
+    receptor,
+    emisor,
+    coordenadas,
+    timestamp de la medida
+    */
 
-    //State variables
-    address public contractOwner;
-    int public limitTemperature;
-    int public higherTemperature;
-
-    constructor() {
+    constructor(int _limitTemperature, int _higherTemperature) { //Parametrizar límites de temperatura
         //contractOwner = address goes here;
-        limitTemperature = -10;
-        higherTemperature = -99;
+        limitTemperature = _limitTemperature;
+        higherTemperature = _higherTemperature;
     }
  
     event alert(address indexed _to, int _temperature);
