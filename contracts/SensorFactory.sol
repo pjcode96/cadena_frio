@@ -10,7 +10,8 @@ contract SensorFactory is Ownable {
     struct Sensor {
         int limitTemperature;
         int higherTemperature;
-        address currentOwner;
+        address sensorAddress;
+        address currentManager;
     }
 
     struct AlertRecord { 
@@ -20,12 +21,14 @@ contract SensorFactory is Ownable {
     }
 
     Sensor[] public sensors;
+    mapping (uint=>address) public sensorToOwner;
     event NewSensor(uint sensorId);
 
-    function _createSensor(int _limitTemperature, int _higherTemperature, address _to, address _from) internal {
+    function _createSensor(int _limitTemperature, int _higherTemperature, address _currentManager) internal returns(uint){
         
-        sensors.push(Sensor(_limitTemperature, _higherTemperature,_to,_from, msg.sender));
+        sensors.push(Sensor(_limitTemperature, _higherTemperature, msg.sender, _currentManager));
         uint id = sensors.length-1;
         emit NewSensor(id);
+        return id;
     }
 }

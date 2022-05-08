@@ -6,33 +6,46 @@ import "./SensorFactory.sol";
 
 contract Route is SensorFactory{
     
-    constructor(address _sender, address _receiver, address _currentRouteManager, string memory _destinyLatitude, string memory _destinyLongitude){
+    constructor(address _sender, address _receiver, string memory _destinyLatitude, string memory _destinyLongitude, int _limitTemperature, int _higherTemperature, address _currentManager){
         address sender = _sender;
         address receiver = _receiver;
-        address currentRouteManager = _currentRouteManager;
         destinyCoordinates memory coordinates = destinyCoordinates(_destinyLatitude, _destinyLongitude);
+        uint sensorId = _createSensor(_limitTemperature, _higherTemperature, _currentManager);
+        Sensor memory sensor = sensors[sensorId];
     }
 
     struct destinyCoordinates {
         string latitude;
         string longitude;
     }
+
+    event TemperatureExceeded(uint sensorId, uint timestamp, address currentManager);
+    event ManagerChanged(uint sensorId, uint timestamp, address previousManager, address newManager);
     
-
-
     /**
      *  This function checks if the given temperature is higher than limitTemperature, if so,
      *  an alert is emitted
      */
-    function checkTemperature(int _temperature) public onlyOwner {
+    function checkTemperature(int _temperature, uint sensorId) public onlyOwner {
+
+        Sensor memory sensor = sensors[sensorId];
+        require(sensor.sensorAddress == msg.sender,"The sender isn't the contract's owner");
+        require(_temperature <= sensor.limitTemperature,"Temperature is fine");
+        
+        if(_temperature > sensor.higherTemperature){
+            sensor.higherTemperature = _temperature;
+        }
+        emit TemperatureExceeded(sensorId, block.timestamp, sensor.currentManager);
+    }
+
+    function changeCurrentManager(address _newManager, uint sensorId) public {
+        address sensorPreviousManager = sensors[sensorId].currentManager;
         require(
-            _temperature <= limitTemperature,
-            "Temperature is fine"
+            sensorPreviousManager == msg.sender,
+            "You're not the current manager"
         );
 
-        if(_temperature > higherTemperature){
-            higherTemperature = _temperature;
-        }
-        emit alert(contractOwner, _temperature);
+        sensors[sensorId].currentManager = _newManager;
+        emit ManagerChanged(sensorId, block.timestamp, sensorPreviousManager, _newManager);
     }
 }
