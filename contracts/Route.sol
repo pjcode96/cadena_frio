@@ -31,7 +31,6 @@ contract Route is SensorFactory{
         Sensor memory sensor = sensors[sensorId];
         require(sensor.sensorAddress == msg.sender,"The sender isn't the contract's owner");
         require(_temperature <= sensor.limitTemperature,"Temperature is fine");
-        
         if(_temperature > sensor.higherTemperature){
             sensor.higherTemperature = _temperature;
         }
