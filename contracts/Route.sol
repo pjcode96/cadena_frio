@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0
 
-pragma solidity >=0.7.0 <0.9.0;
+pragma solidity >=0.8.0 <0.9.0;
 import "./SensorFactory.sol";
 
 
@@ -26,7 +26,7 @@ contract Route is SensorFactory{
      *  This function checks if the given temperature is higher than limitTemperature, if so,
      *  an alert is emitted
      */
-    function checkTemperature(int _temperature, uint sensorId) public onlyOwner {
+    function checkTemperature(int _temperature, uint sensorId) public {
 
         Sensor memory sensor = sensors[sensorId];
         require(sensor.sensorAddress == msg.sender,"The sender isn't the contract's owner");

@@ -2,10 +2,10 @@
 
 pragma solidity >=0.7.0 <0.9.0;
 
-import "@openzeppelin/contracts/access/Ownable.sol";
+//import "@openzeppelin/contracts/access/Ownable.sol";
 import "./Route.sol";
 
-contract SensorFactory is Ownable {
+contract SensorFactory {
 
     struct Sensor {
         int limitTemperature;
