@@ -26,8 +26,13 @@ contract SensorFactory {
 
     function _createSensor(int _limitTemperature, int _higherTemperature, address _currentManager) internal returns(uint){
         
+        uint id = 0;
         sensors.push(Sensor(_limitTemperature, _higherTemperature, msg.sender, _currentManager));
-        uint id = sensors.length-1;
+        if(sensors.length == 0){
+            id = 1;
+        }else{
+            id = sensors.length -1;
+        }
         emit NewSensor(id);
         return id;
     }

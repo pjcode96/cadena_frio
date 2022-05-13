@@ -3,15 +3,28 @@
 pragma solidity >=0.8.0 <0.9.0;
 import "./SensorFactory.sol";
 
-
-contract Route is SensorFactory{
-    
-    constructor(address _sender, address _receiver, string memory _destinyLatitude, string memory _destinyLongitude, int _limitTemperature, int _higherTemperature, address _currentManager){
+contract Route is SensorFactory {
+    constructor(
+        address _sender,
+        address _receiver,
+        string memory _destinyLatitude,
+        string memory _destinyLongitude,
+        int256 _limitTemperature,
+        int256 _higherTemperature,
+        address _currentManager
+    ) {
         address sender = _sender;
         address receiver = _receiver;
-        destinyCoordinates memory coordinates = destinyCoordinates(_destinyLatitude, _destinyLongitude);
-        uint sensorId = _createSensor(_limitTemperature, _higherTemperature, _currentManager);
-        Sensor memory sensor = sensors[sensorId];
+        destinyCoordinates memory coordinates = destinyCoordinates(
+            _destinyLatitude,
+            _destinyLongitude
+        );
+        uint256 sensorId = _createSensor(
+            _limitTemperature,
+            _higherTemperature,
+            _currentManager
+        );
+        Sensor storage sensor = sensors[sensorId];
     }
 
     struct destinyCoordinates {
@@ -19,25 +32,41 @@ contract Route is SensorFactory{
         string longitude;
     }
 
-    event TemperatureExceeded(uint sensorId, uint timestamp, address currentManager);
-    event ManagerChanged(uint sensorId, uint timestamp, address previousManager, address newManager);
-    
+    event TemperatureExceeded(
+        uint256 sensorId,
+        uint256 timestamp,
+        address currentManager
+    );
+    event ManagerChanged(
+        uint256 sensorId,
+        uint256 timestamp,
+        address previousManager,
+        address newManager
+    );
+    event Temp(int256 _temperature);
+
     /**
      *  This function checks if the given temperature is higher than limitTemperature, if so,
      *  an alert is emitted
      */
-    function checkTemperature(int _temperature, uint sensorId) public {
+    function checkTemperature(int256 _temperature, uint256 sensorId) public {
+        require(sensors[sensorId].sensorAddress == msg.sender,"The sender isn't the contract's owner");
 
-        Sensor memory sensor = sensors[sensorId];
-        require(sensor.sensorAddress == msg.sender,"The sender isn't the contract's owner");
-        require(_temperature <= sensor.limitTemperature,"Temperature is fine");
-        if(_temperature > sensor.higherTemperature){
-            sensor.higherTemperature = _temperature;
+        if (_temperature > sensors[sensorId].limitTemperature) {
+            if (_temperature > sensors[sensorId].higherTemperature) {
+                sensors[sensorId].higherTemperature = _temperature;
+            }
+            emit TemperatureExceeded(
+                sensorId,
+                block.timestamp,
+                sensors[sensorId].currentManager
+            );
         }
-        emit TemperatureExceeded(sensorId, block.timestamp, sensor.currentManager);
     }
 
-    function changeCurrentManager(address _newManager, uint sensorId) public {
+    function changeCurrentManager(address _newManager, uint256 sensorId)
+        public
+    {
         address sensorPreviousManager = sensors[sensorId].currentManager;
         require(
             sensorPreviousManager == msg.sender,
@@ -45,6 +74,11 @@ contract Route is SensorFactory{
         );
 
         sensors[sensorId].currentManager = _newManager;
-        emit ManagerChanged(sensorId, block.timestamp, sensorPreviousManager, _newManager);
+        emit ManagerChanged(
+            sensorId,
+            block.timestamp,
+            sensorPreviousManager,
+            _newManager
+        );
     }
 }
