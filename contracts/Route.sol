@@ -50,7 +50,7 @@ contract Route is SensorFactory {
      *  an alert is emitted
      */
     function checkTemperature(int256 _temperature, uint256 sensorId) public {
-        require(sensors[sensorId].sensorAddress == msg.sender,"The sender isn't the contract's owner");
+        require(sensors[sensorId].currentManager == msg.sender,"The sender isn't the contract's owner");
 
         if (_temperature > sensors[sensorId].limitTemperature) {
             if (_temperature > sensors[sensorId].higherTemperature) {
@@ -80,5 +80,9 @@ contract Route is SensorFactory {
             sensorPreviousManager,
             _newManager
         );
+    }
+
+    function getCurrentSensorManager(uint _sensorId) public view returns(address){
+        return sensors[_sensorId].currentManager;
     }
 }

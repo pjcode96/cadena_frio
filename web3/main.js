@@ -3,231 +3,62 @@ const solc = require('solc');   // Library for compile
 const path = require("path");   // LIbrary to manage path
 const fs = require("fs-extra"); // Library for file treatment
 
-const from = "0xb4c905384a3590281D78AdF8D713d6e0bd4025B6";
 const contractAddress = "0x542cdbefe4d324BcD873Da4a03A33b58a7805cf6";
 
+const buildPath = path.resolve(__dirname, "build");
+fs.removeSync(buildPath);
 
-const abi = [
-    {
-      "inputs": [
-        {
-          "internalType": "address",
-          "name": "_sender",
-          "type": "address"
+const contractPath = path.resolve(__dirname, "../contracts");
+const fileNames = fs.readdirSync(contractPath);
+
+const compileInfo = {
+    language: "Solidity",
+    sources: fileNames.reduce((input, fileName) => {
+        const filePath = path.resolve(contractPath, fileName);
+        const source = fs.readFileSync(filePath, "utf8");
+        return { ...input, [fileName]: { content: source } };
+    }, {}),
+    settings: {
+        outputSelection: {
+            "*": {
+                "*": ["abi", "evm.bytecode.object"],
+            },
         },
-        {
-          "internalType": "address",
-          "name": "_receiver",
-          "type": "address"
-        },
-        {
-          "internalType": "string",
-          "name": "_destinyLatitude",
-          "type": "string"
-        },
-        {
-          "internalType": "string",
-          "name": "_destinyLongitude",
-          "type": "string"
-        },
-        {
-          "internalType": "int256",
-          "name": "_limitTemperature",
-          "type": "int256"
-        },
-        {
-          "internalType": "int256",
-          "name": "_higherTemperature",
-          "type": "int256"
-        },
-        {
-          "internalType": "address",
-          "name": "_currentManager",
-          "type": "address"
-        }
-      ],
-      "stateMutability": "nonpayable",
-      "type": "constructor"
     },
-    {
-      "anonymous": false,
-      "inputs": [
-        {
-          "indexed": false,
-          "internalType": "uint256",
-          "name": "sensorId",
-          "type": "uint256"
-        },
-        {
-          "indexed": false,
-          "internalType": "uint256",
-          "name": "timestamp",
-          "type": "uint256"
-        },
-        {
-          "indexed": false,
-          "internalType": "address",
-          "name": "previousManager",
-          "type": "address"
-        },
-        {
-          "indexed": false,
-          "internalType": "address",
-          "name": "newManager",
-          "type": "address"
-        }
-      ],
-      "name": "ManagerChanged",
-      "type": "event"
-    },
-    {
-      "anonymous": false,
-      "inputs": [
-        {
-          "indexed": false,
-          "internalType": "uint256",
-          "name": "sensorId",
-          "type": "uint256"
-        }
-      ],
-      "name": "NewSensor",
-      "type": "event"
-    },
-    {
-      "anonymous": false,
-      "inputs": [
-        {
-          "indexed": false,
-          "internalType": "int256",
-          "name": "_temperature",
-          "type": "int256"
-        }
-      ],
-      "name": "Temp",
-      "type": "event"
-    },
-    {
-      "anonymous": false,
-      "inputs": [
-        {
-          "indexed": false,
-          "internalType": "uint256",
-          "name": "sensorId",
-          "type": "uint256"
-        },
-        {
-          "indexed": false,
-          "internalType": "uint256",
-          "name": "timestamp",
-          "type": "uint256"
-        },
-        {
-          "indexed": false,
-          "internalType": "address",
-          "name": "currentManager",
-          "type": "address"
-        }
-      ],
-      "name": "TemperatureExceeded",
-      "type": "event"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "uint256",
-          "name": "",
-          "type": "uint256"
-        }
-      ],
-      "name": "sensorToOwner",
-      "outputs": [
-        {
-          "internalType": "address",
-          "name": "",
-          "type": "address"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function",
-      "constant": true
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "uint256",
-          "name": "",
-          "type": "uint256"
-        }
-      ],
-      "name": "sensors",
-      "outputs": [
-        {
-          "internalType": "int256",
-          "name": "limitTemperature",
-          "type": "int256"
-        },
-        {
-          "internalType": "int256",
-          "name": "higherTemperature",
-          "type": "int256"
-        },
-        {
-          "internalType": "address",
-          "name": "sensorAddress",
-          "type": "address"
-        },
-        {
-          "internalType": "address",
-          "name": "currentManager",
-          "type": "address"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function",
-      "constant": true
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "int256",
-          "name": "_temperature",
-          "type": "int256"
-        },
-        {
-          "internalType": "uint256",
-          "name": "sensorId",
-          "type": "uint256"
-        }
-      ],
-      "name": "checkTemperature",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "address",
-          "name": "_newManager",
-          "type": "address"
-        },
-        {
-          "internalType": "uint256",
-          "name": "sensorId",
-          "type": "uint256"
-        }
-      ],
-      "name": "changeCurrentManager",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    }
-  ];
+};
+
+const compiled = JSON.parse(solc.compile(JSON.stringify(compileInfo)));
+fs.ensureDirSync(buildPath);
+
 
 // set ganache as provider
 const ganache = new Web3.providers.HttpProvider("http://localhost:7545");
 const web3 = new Web3(ganache);
+const from = web3.utils.toChecksumAddress("0xb4c905384a3590281D78AdF8D713d6e0bd4025B6");
+
+// Here, we get the abi from contract
+const { Route } = compiled.contracts["Route.sol"]
+const { abi, evm } = Route // We'll use the "evm" variable later
+
+const contract = new web3.eth.Contract(abi, "0x66Ae99CcF6c23FD0Dee39EEB11E153A78512c469")
+//checkTemperature(30, 0, from);
+getCurrentSensorManager(0, from)
+//changeCurrentManager(web3.utils.toChecksumAddress("0x542cdbefe4d324BcD873Da4a03A33b58a7805cf5"), 0,from);
+//getCurrentSensorManager(0,from)
+
+// TODO: revisar el contrato inteligente para que el sensor solo tenga manager 
 
 
-const contract = new web3.eth.Contract(abi, "0x4C0fc291a4CDdB9220E82534ff57B86C7df072F9")
-contract.methods.checkTemperature(20, 0).send({from: "0xb4c905384a3590281D78AdF8D713d6e0bd4025B6"});
+function checkTemperature(temperature, sensorId, senderAddress) {
+    contract.methods.checkTemperature(temperature, sensorId).send({ from: senderAddress })
+}
+
+function changeCurrentManager(newManager, sensorId, senderAddress) {
+    contract.methods.changeCurrentManager(newManager, sensorId).send({ from: senderAddress });
+}
+
+function getCurrentSensorManager(sensorId, senderAddress) {
+    contract.methods.getCurrentSensorManager(sensorId).call({ from: senderAddress }).then((res) => {
+        console.log("The current manager's address is: " + res);
+    })
+}
