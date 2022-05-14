@@ -44,19 +44,24 @@ const getAddresses = async () => {
     return {receiver:to, sender:from}
 }
 
-const contract = new web3.eth.Contract(abi, "0x5Df84076493c93251a3D36551d1ea23D57d3A69F")
+const contract = new web3.eth.Contract(abi, "0x38Dca269f97A09053513C53D56FD62eD3912a43e")
 
 try{
     getAddresses().then(({receiver, sender}) =>{
         to = receiver;
         from = sender;
 
-        //getDestinyCoordinates(sender)
-        //getCurrentSensorManager(0, from)
+        
         //changeCurrentManager(to, 0, from);
-        checkTemperature(10, 0, from);
+        //checkTemperature(50, 0, from);
         //changeCurrentManager(from, 0,to);
+        //setNewTemperatureValues(0,-5, -99, from);
+        //setNewDestiny(0, "50.12345123", "150.1231456", from)
+
+        //getDestinyCoordinates(sender)
         //getCurrentSensorManager(0,from)
+        //getCurrentSensorManager(0,from)
+        //getAlertList();
    });
 
 }catch(exception){
@@ -70,11 +75,22 @@ try{
 
 function checkTemperature(temperature, sensorId, senderAddress) {
     contract.methods.checkTemperature(temperature, sensorId).send({ from: senderAddress,gas: 150000, gasPrice: '3000' })
+    .then((res)=>{
+
+    })
 }
 
 function changeCurrentManager(newManager, sensorId, senderAddress) {
     contract.methods.changeCurrentManager(newManager, sensorId).send({ from: senderAddress })
         .then(() => getCurrentSensorManager(sensorId, senderAddress));
+}
+
+function setNewDestiny(sensorId, newLatitude, newLongitude, senderAddress){
+    contract.methods.setNewDestiny(sensorId,newLatitude,newLongitude).send({ from: senderAddress,gas: 150000, gasPrice: '3000' });
+}
+
+function setNewTemperatureValues(sensorId, newLimitTemperature, newHigherTemperature, senderAddress){
+    contract.methods.setNewTemperatureValues(sensorId,newLimitTemperature,newHigherTemperature).send({ from: senderAddress,gas: 150000, gasPrice: '3000' });
 }
 
     // Getters
@@ -88,7 +104,14 @@ function getCurrentSensorManager(sensorId, senderAddress) {
 function getDestinyCoordinates(senderAddress) {
     contract.methods.getDestinyCoordinates().call({ from: senderAddress }).then((res) => {
         console.log("The destiny coordinates are: " + res);
-        console.log("\t Langitude: "+res[0])
+        console.log("\t Latitude: "+res[0])
         console.log("\t Longitude: "+res[1])
     })
+}
+
+function getAlertList(senderAddress) {
+    contract.methods.getAlertList().call({ from: senderAddress }).then((res) => {
+        console.log("The list of alerts:\n");
+        console.table(res);
+    });
 }

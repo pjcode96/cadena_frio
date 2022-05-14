@@ -46,7 +46,15 @@ contract Route is SensorFactory {
     event DestinyChanged(
         Coordinates previousCoordinates,
         Coordinates newCoordinates,
-        uint timestamp,
+        uint256 timestamp,
+        address manager
+    );
+
+    event TemperatureValuesChanged(
+        int previousLimitTemperature,
+        int previousHigherTemperature,
+        int newLimitTemperature,
+        int newHigherTemperature,
         address manager
     );
     
@@ -89,23 +97,25 @@ contract Route is SensorFactory {
                 "You're not the current manager"
         );
 
-        Coordinates memory previousCoordinates;
-        Coordinates memory newCoordinates;
+        Coordinates memory previousCoordinates = destinyCoordinates;
 
-        previousCoordinates.latitude = destinyCoordinates.latitude;
-        previousCoordinates.latitude = destinyCoordinates.longitude;
-        
-        newCoordinates.latitude = _latitude;
-        newCoordinates.longitude = _longitude;
+        destinyCoordinates.latitude = _latitude;
+        destinyCoordinates.longitude = _longitude;
 
-        destinyCoordinates = newCoordinates;
-
-        emit DestinyChanged(previousCoordinates, newCoordinates, block.timestamp, sensors[_sensorId].currentManager);
+        emit DestinyChanged(previousCoordinates, destinyCoordinates, block.timestamp, sensors[_sensorId].currentManager);
     }
 
     function setNewTemperatureValues(uint _sensorId, int _limitTemperature, int _higherTemperature) public{
         require(sensors[_sensorId].currentManager == msg.sender,
             "You're not the current manager"
+        );
+
+        emit TemperatureValuesChanged(
+            sensors[_sensorId].limitTemperature,
+            sensors[_sensorId].higherTemperature, 
+            _limitTemperature, 
+            _higherTemperature, 
+            sensors[_sensorId].currentManager
         );
 
         sensors[_sensorId].limitTemperature = _limitTemperature;
