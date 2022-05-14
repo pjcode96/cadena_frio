@@ -1,6 +1,6 @@
 var Route = artifacts.require("Route");
 var SensorFactory = artifacts.require("SensorFactory");
-var address = "0xb4c905384a3590281D78AdF8D713d6e0bd4025B6";
+var address = "0x082D009811daD1460BEF0BB858cb671bc3A96888";
 module.exports = deployer => {
     deployer.deploy(Route,
         address,

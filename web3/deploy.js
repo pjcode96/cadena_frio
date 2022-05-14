@@ -68,7 +68,7 @@ const deploy = async () => {
     console.log("Contract's address: ", contractAddress);
     const contractInstance = new web3.eth.Contract(abi, contractAddress)
     let metodos = contractInstance.methods;
-    contractInstance.methods.checkTemperature(20, 0).send({from: "0xb4c905384a3590281D78AdF8D713d6e0bd4025B6"});
+    contractInstance.methods.checkTemperature(20, 0).send({from: "0x6cAc62cAd7813ad4c3F5C58c17a9197E1Ac11B00"});
   })
   .on('error', (err) => {
     console.log("Failed to deploy:", error) 

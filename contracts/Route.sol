@@ -4,85 +4,126 @@ pragma solidity >=0.8.0 <0.9.0;
 import "./SensorFactory.sol";
 
 contract Route is SensorFactory {
-    constructor(
-        address _sender,
-        address _receiver,
-        string memory _destinyLatitude,
-        string memory _destinyLongitude,
-        int256 _limitTemperature,
-        int256 _higherTemperature,
-        address _currentManager
-    ) {
-        address sender = _sender;
-        address receiver = _receiver;
-        destinyCoordinates memory coordinates = destinyCoordinates(
-            _destinyLatitude,
-            _destinyLongitude
-        );
-        uint256 sensorId = _createSensor(
-            _limitTemperature,
-            _higherTemperature,
-            _currentManager
-        );
-        Sensor storage sensor = sensors[sensorId];
+    address sender;
+    address receiver;
+    Coordinates destinyCoordinates;
+    uint sensorId;
+    AlertRecord [] alerts;
+    
+    constructor(address _sender,address _receiver,string memory _destinyLatitude,string memory _destinyLongitude,int256 _limitTemperature,int256 _higherTemperature,address _currentManager) {
+        sender = _sender;
+        receiver = _receiver;
+        destinyCoordinates = Coordinates(_destinyLatitude,_destinyLongitude);
+        sensorId = _createSensor(_limitTemperature,_higherTemperature,_currentManager);
     }
 
-    struct destinyCoordinates {
+    // STRUCTS
+    struct Coordinates {
         string latitude;
         string longitude;
     }
 
+    struct AlertRecord { 
+        uint256 timestamp;
+        int registeredTemperature;
+        address manager;
+    }
+
+    // EVENTS
     event TemperatureExceeded(
         uint256 sensorId,
         uint256 timestamp,
         address currentManager
     );
+
     event ManagerChanged(
         uint256 sensorId,
         uint256 timestamp,
         address previousManager,
         address newManager
     );
-    event Temp(int256 _temperature);
 
+    event DestinyChanged(
+        Coordinates previousCoordinates,
+        Coordinates newCoordinates,
+        uint timestamp,
+        address manager
+    );
+    
+
+    /* CONTRACT'S FUNCTIONS */
+
+        // SETTERS
     /**
      *  This function checks if the given temperature is higher than limitTemperature, if so,
      *  an alert is emitted
      */
-    function checkTemperature(int256 _temperature, uint256 sensorId) public {
-        require(sensors[sensorId].currentManager == msg.sender,"The sender isn't the contract's owner");
+    function checkTemperature(int256 _temperature, uint256 _sensorId) public {
+        require(sensors[_sensorId].currentManager == msg.sender,"The sender isn't the contract's owner");
 
-        if (_temperature > sensors[sensorId].limitTemperature) {
-            if (_temperature > sensors[sensorId].higherTemperature) {
-                sensors[sensorId].higherTemperature = _temperature;
+        if (_temperature > sensors[_sensorId].limitTemperature) {
+            if (_temperature > sensors[_sensorId].higherTemperature) {
+                sensors[_sensorId].higherTemperature = _temperature;
             }
-            emit TemperatureExceeded(
-                sensorId,
-                block.timestamp,
-                sensors[sensorId].currentManager
-            );
+            
+            alerts.push(AlertRecord(block.timestamp, _temperature, sensors[_sensorId].currentManager));
+            emit TemperatureExceeded(_sensorId,block.timestamp,sensors[_sensorId].currentManager);
         }
     }
 
-    function changeCurrentManager(address _newManager, uint256 sensorId)
+    function changeCurrentManager(address _newManager, uint256 _sensorId)
         public
     {
-        address sensorPreviousManager = sensors[sensorId].currentManager;
+        address sensorPreviousManager = sensors[_sensorId].currentManager;
         require(
             sensorPreviousManager == msg.sender,
             "You're not the current manager"
         );
 
         sensors[sensorId].currentManager = _newManager;
-        emit ManagerChanged(
-            sensorId,
-            block.timestamp,
-            sensorPreviousManager,
-            _newManager
-        );
+        emit ManagerChanged(sensorId,block.timestamp,sensorPreviousManager,_newManager);
     }
+
+    function setNewDestiny(uint _sensorId, string memory _latitude, string memory _longitude) public {
+        require(sensors[_sensorId].currentManager == msg.sender,
+                "You're not the current manager"
+        );
+
+        Coordinates memory previousCoordinates;
+        Coordinates memory newCoordinates;
+
+        previousCoordinates.latitude = destinyCoordinates.latitude;
+        previousCoordinates.latitude = destinyCoordinates.longitude;
+        
+        newCoordinates.latitude = _latitude;
+        newCoordinates.longitude = _longitude;
+
+        destinyCoordinates = newCoordinates;
+
+        emit DestinyChanged(previousCoordinates, newCoordinates, block.timestamp, sensors[_sensorId].currentManager);
+    }
+
+    function setNewTemperatureValues(uint _sensorId, int _limitTemperature, int _higherTemperature) public{
+        require(sensors[_sensorId].currentManager == msg.sender,
+            "You're not the current manager"
+        );
+
+        sensors[_sensorId].limitTemperature = _limitTemperature;
+        sensors[_sensorId].higherTemperature = _higherTemperature;
+    }
+
+
+        // GETTERS
 
     function getCurrentSensorManager(uint _sensorId) public view returns(address){
         return sensors[_sensorId].currentManager;
+    }
+
+    function getDestinyCoordinates() public view returns(Coordinates memory){
+        return destinyCoordinates;
+    }
+
+    function getAlertList() public view returns(AlertRecord [] memory){
+        return alerts;
     }
 }
