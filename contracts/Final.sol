@@ -17,6 +17,17 @@ contract Route is SensorFactory {
         sensorId = _createSensor(_limitTemperature,_higherTemperature,_currentManager);
     }
 
+
+    
+
+
+
+
+
+
+
+
+
     // STRUCTS
     struct Coordinates {
         string latitude;
