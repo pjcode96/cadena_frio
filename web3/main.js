@@ -19,7 +19,7 @@ const compileInfo = {
     settings: {
         outputSelection: {
             "*": {
-                "*": ["abi", "evm.bytecode.object"],
+                "*": ["abi"],
             },
         },
     },
@@ -35,7 +35,7 @@ const web3 = new Web3(ganache);
 
 // Here, we get the abi from contract
 const { RouteFactory } = compiled.contracts["RouteFactory.sol"]
-const { abi, evm } = RouteFactory // We'll use the "evm" variable later
+const { abi} = RouteFactory
 
 const getAddresses = async () => {
     const accounts = await web3.eth.getAccounts();
@@ -44,7 +44,7 @@ const getAddresses = async () => {
     return { receiver: to, sender: from }
 }
 
-const contract = new web3.eth.Contract(abi, "0x8E20c409E659d1e691029cB8C33275F05c701196")
+const contract = new web3.eth.Contract(abi, "0xacc761F3D02D9F81eE48FA71A71d79cF29f07264")
 
 try {
     getAddresses().then(({ receiver, sender }) => {
@@ -56,7 +56,7 @@ try {
 
         //changeCurrentManager(to, 0, from);
         //changeCurrentManager(from, 0,to);
-        checkTemperature(50, 0, from);
+        //checkTemperature(50, 0, from);
         //setNewTemperatureValues(0,-5, -99, from);
         //setNewDestiny(0, "50.12345123", "150.1231456", from)
 
@@ -74,7 +74,7 @@ try {
 
 function createRoute(sender, receiver, destinyLatitude, destinyLongitude, limitTemperature, higherTemperature, senderAddress) {
     contract.methods.createRoute(sender, receiver, destinyLatitude, destinyLongitude, limitTemperature, higherTemperature)
-        .send({ from: senderAddress, gas: 1500000, gasPrice: '30000' })
+        .send({ from: senderAddress, gas: 2000000, gasPrice: '3000000000' })
         .then((res) => {
             console.log("Route with ID " + res.events.NewSensor.returnValues[0] + " created");
         });
@@ -83,7 +83,7 @@ function createRoute(sender, receiver, destinyLatitude, destinyLongitude, limitT
 // Setters
 
 function checkTemperature(temperature, routeId, senderAddress) {
-    contract.methods.checkTemperature(temperature, routeId).send({ from: senderAddress, gas: 150000, gasPrice: '3000' })
+    contract.methods.checkTemperature(temperature, routeId).send({ from: senderAddress, gas: 2000000, gasPrice: '3000000000' })
         .then((res) => {
             console.log("Temperature exceeded: " + temperature + "º");
         })
@@ -98,7 +98,7 @@ function changeCurrentManager(newManager, routeId, senderAddress) {
 }
 
 function setNewDestiny(routeId, newLatitude, newLongitude, senderAddress) {
-    contract.methods.setNewDestiny(routeId, newLatitude, newLongitude).send({ from: senderAddress, gas: 150000, gasPrice: '3000' })
+    contract.methods.setNewDestiny(routeId, newLatitude, newLongitude).send({ from: senderAddress, gas: 2000000, gasPrice: '3000000000' })
         .then(() => console.log("Destiny has been changed"));
 }
 
