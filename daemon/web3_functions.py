@@ -27,5 +27,6 @@ abi = contract_interface[1]['abi']
 contract = web3.eth.contract(address=contract_address, abi=abi)
 
 account = '0x5154bE9474673cC5C1134Ff021DEce8369ae9743'
-result = contract.functions.createRoute(account, account, "50º", "30º", -10, -150).call({'from': web3.eth.accounts[0]})
-print(result)
+web3.eth.defaultAccount = account
+result = contract.functions.getCurrentRouteManager(0).call()#createRoute(account, account, "50º", "30º", -10, -150)
+print(contract.functions.getCurrentRouteManager(0))

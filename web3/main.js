@@ -44,7 +44,7 @@ const getAddresses = async () => {
     return { receiver: to, sender: from }
 }
 
-const contract = new web3.eth.Contract(abi, "0xacc761F3D02D9F81eE48FA71A71d79cF29f07264")
+const contract = new web3.eth.Contract(abi, "0x58bAA8CFB788Fbf64c1a6498d6dAe5ADC4B8EF7a")
 
 try {
     getAddresses().then(({ receiver, sender }) => {
@@ -52,7 +52,7 @@ try {
         from = sender;
 
 
-        //createRoute(from, to, "30º", "120º", -10, -200, from)
+        createRoute(from, to, "30º", "120º", -10, -200, from)
 
         //changeCurrentManager(to, 0, from);
         //changeCurrentManager(from, 0,to);
