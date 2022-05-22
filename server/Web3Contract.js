@@ -36,10 +36,10 @@ class Web3Contract {
 
     // Getters
 
-    async getCurrentRouteManager(routeId, senderAddress) {
-        this.contract.methods.getCurrentRouteManager(routeId).call({ from: senderAddress })
+    getCurrentRouteManager(routeId, senderAddress) {
+        return this.contract.methods.getCurrentRouteManager(routeId).call({ from: senderAddress })
             .then((res) => {
-                console.log("The current manager's address is: " + res);
+                return res;
             })
     }
 

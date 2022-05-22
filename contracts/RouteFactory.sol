@@ -19,8 +19,8 @@ contract RouteFactory {
     struct Route{
         address sender;
         address receiver;
-        string destinyLatitude;
-        string destinyLongitude;
+        string destinationLatitude;
+        string destinationLongitude;
         address currentManager;
         uint sensorId;
     }
@@ -53,7 +53,7 @@ contract RouteFactory {
         address newManager
     );
 
-    event DestinyChanged(
+    event DestinationChanged(
         Coordinates previousCoordinates,
         Coordinates newCoordinates,
         uint256 timestamp,
@@ -82,11 +82,11 @@ contract RouteFactory {
         return sensorId;
     }
 
-    function createRoute(address _sender,address _receiver,string memory _destinyLatitude,string memory _destinyLongitude, int _limitTemperature, int _higherTemperature) public returns(uint){
+    function createRoute(address _sender,address _receiver,string memory _destinationLatitude,string memory _destinationLongitude, int _limitTemperature, int _higherTemperature) public returns(uint){
         uint routeId = 0;
         uint sensorId = createSensor(_limitTemperature, _higherTemperature);
 
-        routes.push(Route(_sender, _receiver, _destinyLatitude, _destinyLongitude, msg.sender, sensorId));
+        routes.push(Route(_sender, _receiver, _destinationLatitude, _destinationLongitude, msg.sender, sensorId));
         routeId = routes.length-1;
         return routeId;
     }  
@@ -130,18 +130,20 @@ contract RouteFactory {
         return _newManager;
     }
 
-    function setNewDestiny(uint _routeId, string memory _latitude, string memory _longitude) public {
+    function setNewDestination(uint _routeId, string memory _latitude, string memory _longitude) public returns(Coordinates memory){
         require(routes[_routeId].currentManager == msg.sender,
                 "You're not the current manager"
         );
 
-        Coordinates memory previousCoordinates = Coordinates(routes[_routeId].destinyLatitude, routes[_routeId].destinyLongitude);
+        Coordinates memory previousCoordinates = Coordinates(routes[_routeId].destinationLatitude, routes[_routeId].destinationLongitude);
         Coordinates memory newCoordinates = Coordinates(_latitude, _longitude);
 
-        routes[_routeId].destinyLatitude = _latitude;
-        routes[_routeId].destinyLongitude = _longitude;
+        routes[_routeId].destinationLatitude = _latitude;
+        routes[_routeId].destinationLongitude = _longitude;
 
-        emit DestinyChanged(previousCoordinates, newCoordinates, block.timestamp, routes[_routeId].currentManager);
+        emit DestinationChanged(previousCoordinates, newCoordinates, block.timestamp, routes[_routeId].currentManager);
+
+        return newCoordinates;
     }
 
     function setNewTemperatureValues(uint _routeId, int _limitTemperature, int _higherTemperature) public{
@@ -170,11 +172,16 @@ contract RouteFactory {
         return routes[_routeId].currentManager;
     }
 
-    function getDestinyCoordinates(uint _routeId) public view returns(Coordinates memory){
-        return Coordinates(routes[_routeId].destinyLatitude,routes[_routeId].destinyLongitude);
+    function getDestinationCoordinates(uint _routeId) public view returns(Coordinates memory){
+        return Coordinates(routes[_routeId].destinationLatitude,routes[_routeId].destinationLongitude);
     }
 
     function getAlertList() public view returns(AlertRecord [] memory){
         return alerts;
+    }
+
+    function getRouteData(uint _routeId) public view returns(Route memory, Sensor memory){
+
+        return (routes[_routeId], sensors[routes[_routeId].sensorId]);
     }
 }

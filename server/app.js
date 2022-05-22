@@ -1,16 +1,19 @@
 const express = require('express');
 const path = require("path");   // LIbrary to manage path
 const Web3Contract = require('./Web3Contract.js');
+const bodyParser = require('body-parser');
+const createError = require('http-errors');
 
-
-
-const contractAddress = "0x58bAA8CFB788Fbf64c1a6498d6dAe5ADC4B8EF7a"
+const contractAddress = "0x5A2C34F8d08b3bAdF6e04931F08bF68441D647d7"
 const address = "0x5154bE9474673cC5C1134Ff021DEce8369ae9743"
 
-const contract = new Web3Contract(contractAddress, address);
+const w3contract = new Web3Contract(contractAddress, address);
 
 const port = 3000;
 const app = express();
+
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 
 // Here we associate handlebars
 
@@ -32,14 +35,25 @@ app.get('/', (req, res) => {
             author: 'Janith Kasun',
             image: 'https://picsum.photos/500/500',
             comments: []
-        }});
+        }
+    });
 
 })
 
 
-app.get('/about', (req, res) => {
-    res.type('text/plain')
-    res.send('Server Expresso ☕ About')
+app.get('/current-manager', (req, response) => {
+
+    return w3contract.getCurrentRouteManager(0, address).then((res) => {
+        console.log(res)
+        response.end(res);
+        //response.render('home', { managerAddress: res});
+    });
+
+    // return w3contract.contract.methods.getCurrentRouteManager(0).call({ from: address })
+    // .then((res) => {
+    //         console.log("The current manager's address is: " + res);
+    //         return res;
+    //     })
 })
 
 
@@ -50,4 +64,4 @@ app.use((req, res) => {
 })
 
 
-app.listen(port,() => console.log(`Deployed in port ${port} `))
+app.listen(port, () => console.log(`Deployed in port ${port} `))

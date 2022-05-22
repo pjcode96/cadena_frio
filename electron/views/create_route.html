@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Get Route</title>
+    <link rel="stylesheet" href="./bootstrap.min.css">
+</head>
+
+<body>
+    <div class="container">
+        <div class="card-body">
+            <form id="get_route" class="p-4">
+                <div class="form-group">
+                    <input type="text" class="form-control" placeholder="Enter route ID">
+                    <button class="btn btn-primary btn-block mt-2">
+                        Get current manager's address
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let form = document.querySelector('form');
+        debugger
+        form.addEventListener('submit', (event) => {
+            event.preventDefault();
+            let origin = event.currentTarget.id;
+            window.api.send('' + origin, form[0].value);
+        })
+    </script>
+</body>
+
+</html>
