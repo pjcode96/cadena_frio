@@ -12,18 +12,36 @@
 
     <div class="container p-4 mb-3 mt-5">
         <h3 class="text-primary text-center">
-            Welcome! you must enter the route's ID to continue
+            Welcome! 
         </h3>
         <div class="card">
-            <div class="card-body row">
-                <div class="col-6"><strong>Sender address: </strong>${route.sender}</div>
-                <div class="col-6"><strong>receiver address:</strong>${route.destinationLatitude}</div>
-                <div class="col-6"></div>
+            <div id="route-data" class="card-body row">
+                <h1 class="danger"> You must enter the route's ID to continue </h1>
             </div>
         </div>
-        
+
     </div>
 
+    <script>
+        
+        window.api.receive("receive_route", (data) => {
+            
+            let element = document.getElementById("route-data");
+            let template = `
+            <div class="col-12"><strong>Sender address: </strong>${data.sender}</div>
+            <div class="col-12"><strong>Receiver address: </strong>${data.receiver}</div>
+            <div class="col-12"><strong>Receiver address: </strong>${data.currentManager}</div>
+            <div class="col-6"><strong>Latitude: </strong>${data.destinationLatitude}</div>
+            <div class="col-6"><strong>Longitude: </strong>${data.destinationLongitude}</div>
+            <div class="col-6"><strong>Sensor limit temperature: </strong>${data.sensor.limitTemperature}</div>
+            <div class="col-6"><strong>Sensor higher temperature: </strong>${data.sensor.higherTemperature}</div>
+            `
+            element.innerHTML = "";
+            element.innerHTML += template;
+        })
+
+        
+    </script>
 
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
         integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
@@ -31,6 +49,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-ho+j7jyWK8fNQe+A12Hb8AhRq26LrZ/JpcUGGOn+Y7RsweNrtN/tE3MoK7ZeZDyx"
         crossorigin="anonymous"></script>
+
 
 </body>
 

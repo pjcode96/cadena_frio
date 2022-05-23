@@ -1,4 +1,4 @@
-const { app, BrowserWindow, Menu, ipcMain } = require('electron');
+const { app, BrowserWindow, Menu, ipcMain , ipcRenderer} = require('electron');
 const Web3Contract = require('./Web3Contract.js');
 const url = require('url');
 const path = require('path');
@@ -39,7 +39,18 @@ let route;
 let sensor;
 
 app.on('ready', () => {
-    homeWindow = new BrowserWindow({});
+    homeWindow = new BrowserWindow({
+        width: 500,
+        height: 400,
+        title: 'Home',
+        webPreferences: {
+            nodeIntegration: false, // is default value after Electron v5
+            contextIsolation: true, // protect against prototype pollution
+            enableRemoteModule: false, // turn off remote
+            preload: path.join(__dirname, 'preload.js')
+        }
+    });
+
     homeWindow.loadURL(url.format({
         pathname: path.join(__dirname, 'views/home.html'),
         protocol: 'file',
@@ -48,7 +59,7 @@ app.on('ready', () => {
 
     
     Menu.setApplicationMenu(Menu.buildFromTemplate(menu))
-
+    homeWindow.webContents.openDevTools()
     homeWindow.on('closed', () => {
         app.quit();
     });
@@ -72,8 +83,8 @@ ipcMain.on('get_route', (event,routeId) => {
                     }
                 }
 
-                homeWindow.webContents.send('route', route);
-                currentSecondaryWindow.close();
+                homeWindow.webContents.send('receive_route', route);
+                //currentSecondaryWindow.close();
             }
             
         }
@@ -87,10 +98,10 @@ function getSecondaryWindow(title, filepath) {
         height: 400,
         title: title,
         webPreferences: {
-            nodeIntegration: false, 
-            contextIsolation: true, 
-            enableRemoteModule: false, 
-            preload: path.join(__dirname, "preload.js") // use a preload script
+            nodeIntegration: false, // is default value after Electron v5
+            contextIsolation: true, // protect against prototype pollution
+            enableRemoteModule: false, // turn off remote
+            preload: path.join(__dirname, 'preload.js')
         }
     })
 
