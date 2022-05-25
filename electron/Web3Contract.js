@@ -26,7 +26,7 @@ class Web3Contract {
     async changeCurrentManager(newManager, routeId, senderAddress) {
         return this.contract.methods.changeCurrentManager(newManager, routeId).send({ from: senderAddress })
             .then((res) => {
-                result = {
+                let result = {
                     previousManager: res.events.ManagerChanged.returnValues[2],
                     newManager: res.events.ManagerChanged.returnValues[3]
                 }
@@ -64,7 +64,6 @@ class Web3Contract {
 
     async getRouteData(routeId, senderAddress) {
         return this.contract.methods.getRouteData(routeId).call({ from: senderAddress }).then((res) => {
-            let prueba= res;
             return res;
         }
         );

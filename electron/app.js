@@ -13,15 +13,26 @@ const menu = [
         label: 'Route',
         submenu: [
             {
-                label: 'Create Route',
+                label: 'Alerts',
                 click() {
-                    getSecondaryWindow('Create Route', 'views/create_route.html');
-                }
-            },
-            {
-                label: 'Get Route',
-                click() {
-                    getSecondaryWindow('Get Route', 'views/get_route.html');
+                    w3contract.getAlertList(address).then(
+                        (alerts) => {
+                            getSecondaryWindow('Create Route', 'views/alerts.html');
+                            let alertList = [];
+                            let date;
+                            for(var i = 0; i < alerts.length; i++){
+                                date = new Date(parseInt(alerts[i].timestamp));
+                                date = date.getDate()+"/"+date.getMonth()+"/"+date.getFullYear();
+                                alertList.push({
+                                    date: date,
+                                    registeredTemperature: alerts[i].registeredTemperature,
+                                    manager: alerts[i].manager
+                                })
+                            }
+                            homeWindow.webContents.send('receive_alerts', alertList);
+                        }
+                    );
+                    
                 }
             }
         ]
@@ -34,7 +45,6 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 let homeWindow;
-let currentSecondaryWindow;
 let route;
 let id;
 
@@ -117,7 +127,6 @@ ipcMain.on('create_route', (event, routeParams) => {
                         homeWindow.webContents.send('receive_route', route);
                         //currentSecondaryWindow.close();
                     }
-    
                 }
             )
         }
@@ -130,6 +139,69 @@ ipcMain.on('change_manager', (event, data) => {
             w3contract.getRouteData(id, address).then(
                 (res) => {
         
+                    if (res) {
+                        route = {
+                            routeId: id,
+                            sender: res[0][0],
+                            receiver: res[0][1],
+                            destinationLatitude: res[0][2],
+                            destinationLongitude: res[0][3],
+                            currentManager: res[0][4],
+                            sensor: {
+                                limitTemperature: res[1][0],
+                                higherTemperature: res[1][1]
+                            }
+                        }
+        
+                        homeWindow.webContents.send('receive_route', route);
+                        //currentSecondaryWindow.close();
+                    }
+                }
+            );
+        }
+    )
+})
+
+ipcMain.on('change_destination', (event, data) => {
+    w3contract.setNewDestination(id, data.destinationLatitude, data.destinationLongitude, address).then(
+        () => {
+            w3contract.getRouteData(id, address).then(
+                (res) => {
+        
+                    if (res) {
+                        route = {
+                            routeId: id,
+                            sender: res[0][0],
+                            receiver: res[0][1],
+                            destinationLatitude: res[0][2],
+                            destinationLongitude: res[0][3],
+                            currentManager: res[0][4],
+                            sensor: {
+                                limitTemperature: res[1][0],
+                                higherTemperature: res[1][1]
+                            }
+                        }
+        
+                        homeWindow.webContents.send('receive_route', route);
+                        //currentSecondaryWindow.close();
+                    }
+                }
+            );
+        }
+    )
+})
+
+
+ipcMain.on('check_temperature', (event, temperature) => {
+    w3contract.checkTemperature(temperature, id, address);
+})
+
+ipcMain.on('change_temperatures', (event, data) => {
+    w3contract.setNewTemperatureValues(id, data.limitTemperature, data.higherTemperature, address).then(
+        () => {
+            w3contract.getRouteData(id, address).then(
+                (res) => {
+
                     if (res) {
                         route = {
                             routeId: id,
