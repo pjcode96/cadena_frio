@@ -1,4 +1,4 @@
-const { app, BrowserWindow, Menu, ipcMain , ipcRenderer} = require('electron');
+const { app, BrowserWindow, Menu, ipcMain, ipcRenderer } = require('electron');
 const Web3Contract = require('./Web3Contract.js');
 const url = require('url');
 const path = require('path');
@@ -36,7 +36,7 @@ if (process.env.NODE_ENV !== 'production') {
 let homeWindow;
 let currentSecondaryWindow;
 let route;
-let sensor;
+let id;
 
 app.on('ready', () => {
     homeWindow = new BrowserWindow({
@@ -57,7 +57,7 @@ app.on('ready', () => {
         slashes: true
     }))
 
-    
+
     Menu.setApplicationMenu(Menu.buildFromTemplate(menu))
     homeWindow.webContents.openDevTools()
     homeWindow.on('closed', () => {
@@ -66,12 +66,14 @@ app.on('ready', () => {
 
 })
 
-ipcMain.on('get_route', (event,routeId) => {
+ipcMain.on('get_route', (event, routeId) => {
+    id = routeId
     w3contract.getRouteData(routeId, address).then(
         (res) => {
-            
-            if(res){
+
+            if (res) {
                 route = {
+                    routeId: routeId,
                     sender: res[0][0],
                     receiver: res[0][1],
                     destinationLatitude: res[0][2],
@@ -86,9 +88,69 @@ ipcMain.on('get_route', (event,routeId) => {
                 homeWindow.webContents.send('receive_route', route);
                 //currentSecondaryWindow.close();
             }
-            
+
         }
     );
+})
+
+ipcMain.on('create_route', (event, routeParams) => {
+    w3contract.createRoute(routeParams.sender,routeParams.receiver,routeParams.destinationLatitude,routeParams.destinationLongitude,routeParams.limitTemperature,routeParams.higherTemperature, address).then(
+        (res) =>{
+            id = res;
+            w3contract.getRouteData(res, address).then(
+                (res) => {
+    
+                    if (res) {
+                        route = {
+                            routeId: id,
+                            sender: res[0][0],
+                            receiver: res[0][1],
+                            destinationLatitude: res[0][2],
+                            destinationLongitude: res[0][3],
+                            currentManager: res[0][4],
+                            sensor: {
+                                limitTemperature: res[1][0],
+                                higherTemperature: res[1][1]
+                            }
+                        }
+    
+                        homeWindow.webContents.send('receive_route', route);
+                        //currentSecondaryWindow.close();
+                    }
+    
+                }
+            )
+        }
+    );
+})
+
+ipcMain.on('change_manager', (event, data) => {
+    w3contract.changeCurrentManager(data, id, address).then(
+        () => {
+            w3contract.getRouteData(id, address).then(
+                (res) => {
+        
+                    if (res) {
+                        route = {
+                            routeId: id,
+                            sender: res[0][0],
+                            receiver: res[0][1],
+                            destinationLatitude: res[0][2],
+                            destinationLongitude: res[0][3],
+                            currentManager: res[0][4],
+                            sensor: {
+                                limitTemperature: res[1][0],
+                                higherTemperature: res[1][1]
+                            }
+                        }
+        
+                        homeWindow.webContents.send('receive_route', route);
+                        //currentSecondaryWindow.close();
+                    }
+                }
+            );
+        }
+    )
 })
 
 function getSecondaryWindow(title, filepath) {
