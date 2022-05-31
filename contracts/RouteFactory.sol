@@ -38,7 +38,7 @@ contract RouteFactory {
 
     // EVENTS
 
-    event NewSensor(uint sensorId);
+    event NewRoute(uint routeId);
 
     event TemperatureExceeded(
         uint256 sensorId,
@@ -78,7 +78,6 @@ contract RouteFactory {
         sensors.push(Sensor(_limitTemperature, _higherTemperature));
 
         sensorId = sensors.length -1;
-        emit NewSensor(sensorId);
         return sensorId;
     }
 
@@ -88,7 +87,7 @@ contract RouteFactory {
 
         routes.push(Route(_sender, _receiver, _destinationLatitude, _destinationLongitude, msg.sender, sensorId));
         routeId = routes.length-1;
-        return routeId;
+        emit NewRoute(routeId);
     }  
 
         // SETTERS
@@ -113,7 +112,6 @@ contract RouteFactory {
                 block.timestamp,
                 currentManager
             );
-            return alerts.length-1;
         }
     }
 
@@ -127,7 +125,6 @@ contract RouteFactory {
 
         routes[_routeId].currentManager = _newManager;
         emit ManagerChanged(_routeId,block.timestamp,sensorPreviousManager,_newManager);
-        return _newManager;
     }
 
     function setNewDestination(uint _routeId, string memory _latitude, string memory _longitude) public returns(Coordinates memory){
@@ -142,8 +139,6 @@ contract RouteFactory {
         routes[_routeId].destinationLongitude = _longitude;
 
         emit DestinationChanged(previousCoordinates, newCoordinates, block.timestamp, routes[_routeId].currentManager);
-
-        return newCoordinates;
     }
 
     function setNewTemperatureValues(uint _routeId, int _limitTemperature, int _higherTemperature) public{
@@ -181,7 +176,10 @@ contract RouteFactory {
     }
 
     function getRouteData(uint _routeId) public view returns(Route memory, Sensor memory){
-
         return (routes[_routeId], sensors[routes[_routeId].sensorId]);
+    }
+
+    function getTemperatureValues(uint _sensorId) public view returns(int, int){
+        return (sensors[_sensorId].limitTemperature, sensors[_sensorId].higherTemperature);
     }
 }

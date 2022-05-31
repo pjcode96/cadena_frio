@@ -13,7 +13,7 @@ class Web3Contract {
     async createRoute(sender, receiver, destinationLatitude, destinationLongitude, limitTemperature, higherTemperature, senderAddress) {
         return this.contract.methods.createRoute(sender, receiver, destinationLatitude, destinationLongitude, limitTemperature, higherTemperature)
             .send({ from: senderAddress, gas: 2000000, gasPrice: '3000000000' })
-            .then((res) => res.events.NewSensor.returnValues[0]);
+            .then((res) => res.events.NewRoute.returnValues[0]);
     }
 
     async checkTemperature(temperature, routeId, senderAddress) {

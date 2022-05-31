@@ -4,10 +4,11 @@ const url = require('url');
 const path = require('path');
 const { Router } = require('express');
 
-const contractAddress = "0x9a420beAe19F55C4F02D7d3493C81114187B9Fb8"
-const address = "0x5154bE9474673cC5C1134Ff021DEce8369ae9743"
+const contractAddress = "0x07C02FfdFD3a81C15cc06b0C1d7b1E4822578891"
+const address = "0x608c9f595EAAe822511a89AcE833Cf7865a49DB4"
 
 const w3contract = new Web3Contract(contractAddress, address);
+
 const menu = [
     {
         label: 'Route',
@@ -15,36 +16,22 @@ const menu = [
             {
                 label: 'Alerts',
                 click() {
-                    w3contract.getAlertList(address).then(
-                        (alerts) => {
-                            getSecondaryWindow('Create Route', 'views/alerts.html');
-                            let alertList = [];
-                            let date;
-                            for(var i = 0; i < alerts.length; i++){
-                                date = new Date(parseInt(alerts[i].timestamp));
-                                date = date.getDate()+"/"+date.getMonth()+"/"+date.getFullYear();
-                                alertList.push({
-                                    date: date,
-                                    registeredTemperature: alerts[i].registeredTemperature,
-                                    manager: alerts[i].manager
-                                })
-                            }
-                            homeWindow.webContents.send('receive_alerts', alertList);
-                        }
-                    );
-                    
+                    currentSecondaryWindow = getSecondaryWindow('Create Route', 'views/alerts.html');
                 }
+
             }
+
         ]
     }
-];
+]
 
 
-if (process.env.NODE_ENV !== 'production') {
-    require('electron-reload')(__dirname, {})
+if(process.env.NODE_ENV !== 'production') {
+        require('electron-reload')(__dirname, {})
 }
 
 let homeWindow;
+let currentSecondaryWindow;
 let route;
 let id;
 
@@ -54,9 +41,9 @@ app.on('ready', () => {
         height: 400,
         title: 'Home',
         webPreferences: {
-            nodeIntegration: false, // is default value after Electron v5
-            contextIsolation: true, // protect against prototype pollution
-            enableRemoteModule: false, // turn off remote
+            nodeIntegration: false,
+            contextIsolation: true,
+            enableRemoteModule: false,
             preload: path.join(__dirname, 'preload.js')
         }
     });
@@ -96,7 +83,6 @@ ipcMain.on('get_route', (event, routeId) => {
                 }
 
                 homeWindow.webContents.send('receive_route', route);
-                //currentSecondaryWindow.close();
             }
 
         }
@@ -104,12 +90,12 @@ ipcMain.on('get_route', (event, routeId) => {
 })
 
 ipcMain.on('create_route', (event, routeParams) => {
-    w3contract.createRoute(routeParams.sender,routeParams.receiver,routeParams.destinationLatitude,routeParams.destinationLongitude,routeParams.limitTemperature,routeParams.higherTemperature, address).then(
-        (res) =>{
+    w3contract.createRoute(routeParams.sender, routeParams.receiver, routeParams.destinationLatitude, routeParams.destinationLongitude, routeParams.limitTemperature, routeParams.higherTemperature, address).then(
+        (res) => {
             id = res;
             w3contract.getRouteData(res, address).then(
                 (res) => {
-    
+
                     if (res) {
                         route = {
                             routeId: id,
@@ -123,9 +109,8 @@ ipcMain.on('create_route', (event, routeParams) => {
                                 higherTemperature: res[1][1]
                             }
                         }
-    
+
                         homeWindow.webContents.send('receive_route', route);
-                        //currentSecondaryWindow.close();
                     }
                 }
             )
@@ -138,7 +123,7 @@ ipcMain.on('change_manager', (event, data) => {
         () => {
             w3contract.getRouteData(id, address).then(
                 (res) => {
-        
+
                     if (res) {
                         route = {
                             routeId: id,
@@ -152,9 +137,8 @@ ipcMain.on('change_manager', (event, data) => {
                                 higherTemperature: res[1][1]
                             }
                         }
-        
+
                         homeWindow.webContents.send('receive_route', route);
-                        //currentSecondaryWindow.close();
                     }
                 }
             );
@@ -167,7 +151,7 @@ ipcMain.on('change_destination', (event, data) => {
         () => {
             w3contract.getRouteData(id, address).then(
                 (res) => {
-        
+
                     if (res) {
                         route = {
                             routeId: id,
@@ -181,9 +165,8 @@ ipcMain.on('change_destination', (event, data) => {
                                 higherTemperature: res[1][1]
                             }
                         }
-        
+
                         homeWindow.webContents.send('receive_route', route);
-                        //currentSecondaryWindow.close();
                     }
                 }
             );
@@ -215,14 +198,32 @@ ipcMain.on('change_temperatures', (event, data) => {
                                 higherTemperature: res[1][1]
                             }
                         }
-        
+
                         homeWindow.webContents.send('receive_route', route);
-                        //currentSecondaryWindow.close();
                     }
                 }
             );
         }
     )
+})
+
+ipcMain.on('get_alerts', (event, data) => {
+    w3contract.getAlertList(address).then(
+        (alerts) => {
+            let alertList = [];
+            let date;
+            for (var i = 0; i < alerts.length; i++) {
+                date = new Date(parseInt(alerts[i].timestamp));
+                date = date.getDate() + "/" + date.getMonth() + "/" + date.getFullYear();
+                alertList.push({
+                    date: date,
+                    registeredTemperature: alerts[i].registeredTemperature,
+                    manager: alerts[i].manager
+                })
+            }
+            currentSecondaryWindow.webContents.send('receive_alerts', alertList);
+        }
+    );
 })
 
 function getSecondaryWindow(title, filepath) {
@@ -232,9 +233,9 @@ function getSecondaryWindow(title, filepath) {
         height: 400,
         title: title,
         webPreferences: {
-            nodeIntegration: false, // is default value after Electron v5
-            contextIsolation: true, // protect against prototype pollution
-            enableRemoteModule: false, // turn off remote
+            nodeIntegration: false,
+            contextIsolation: true,
+            enableRemoteModule: false,
             preload: path.join(__dirname, 'preload.js')
         }
     })
@@ -251,7 +252,7 @@ function getSecondaryWindow(title, filepath) {
         secondaryWindow = null;
     });
     secondaryWindow.webContents.openDevTools()
-    return currentSecondaryWindow = secondaryWindow;
+    return secondaryWindow;
 }
 
 

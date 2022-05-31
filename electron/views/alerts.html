@@ -12,35 +12,43 @@
 <body>
 
     <div class="container p-4 mb-3 mt-5">
-        
+
         <h3 class="text-primary text-center">
             Alerts
         </h3>
 
-        <div id="get-alerts" class="container p-4">
-
-
+        <div id="get-alerts" class="container p-4 border radious">
 
         </div>
+        <button class="btn btn-primary btn-block mt-2" onclick="getAlerts(event)">
+            get alerts
+        </button>
     </div>
 
 
     <script>
+
+        function getAlerts(event) {
+            window.api.send("get_alerts", null);
+        }
+
         window.api.receive("receive_alerts", (alerts) => {
+            debugger
             let element = document.getElementById("get-alerts");
             let fullTemplate = "";
             let template;
-            
-            for(var i = 0; i<alerts.length; i++){
+
+            for (var i = 0; i < alerts.length; i++) {
                 fullTemplate += `
-                <div class="container p-2 row">
-                    <div class="col-12"><strong>Date: ${alerts[i].timestamp}</strong></div>
-                    <div class="col-12"><strong>Registered temperature: ${alerts[i].registeredTemperature}</strong></div>
-                    <div class="col-12"><strong>Manager: ${alerts[i].manager}</strong></div>
+                <div class="container p-2 row border radious">
+                    <div class="col-12"><strong>Date: </strong> ${alerts[i].date}</div>
+                    <div class="col-12"><strong>Registered temperature: </strong> ${alerts[i].registeredTemperature}</div>
+                    <div class="col-12"><strong>Manager: </strong> ${alerts[i].manager}</div>
                 </div>
                 `;
             }
-            
+            element.innerHTML = "";
+            element.innerHTML += fullTemplate;
         })
     </script>
 
