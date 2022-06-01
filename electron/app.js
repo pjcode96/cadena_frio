@@ -4,8 +4,8 @@ const url = require('url');
 const path = require('path');
 const { Router } = require('express');
 
-const contractAddress = "0x07C02FfdFD3a81C15cc06b0C1d7b1E4822578891"
-const address = "0x608c9f595EAAe822511a89AcE833Cf7865a49DB4"
+const contractAddress = "0x4e7b8Fe2c459141D4fc9AAD6b807cbaF0464ceEE"
+const address = "0x1421BB0212dF4865aF2a617A54F74Dbb2B081d9c"
 
 const w3contract = new Web3Contract(contractAddress, address);
 
