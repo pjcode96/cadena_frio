@@ -5,8 +5,7 @@ const fs = require("fs-extra"); // Library for file treatment
 
 class Web3Contract {
 
-    constructor(contractAddress, owner) {
-        this.currentManagerAddress = owner;
+    constructor(contractAddress) {
         this.contract = this.getContract(contractAddress);
     }
 

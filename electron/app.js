@@ -1,8 +1,7 @@
-const { app, BrowserWindow, Menu, ipcMain, ipcRenderer } = require('electron');
+const { app, BrowserWindow, Menu, ipcMain } = require('electron');
 const Web3Contract = require('./Web3Contract.js');
 const url = require('url');
 const path = require('path');
-const { Router } = require('express');
 
 const contractAddress = "0x4e7b8Fe2c459141D4fc9AAD6b807cbaF0464ceEE"
 const address = "0x1421BB0212dF4865aF2a617A54F74Dbb2B081d9c"
