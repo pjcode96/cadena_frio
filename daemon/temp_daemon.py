@@ -5,7 +5,7 @@ from solcx import compile_source
 import sys
 
 def checkTemperature(sensorId):
-    contract.functions.checkTemperature(sensorId).transact()
+    contract.functions.checkTemperature(temperature, sensorId).transact()
     
 def compile_contract(contract_path):
     with open(contract_path, 'r') as contract_file:
@@ -40,9 +40,10 @@ while True:
     temperature = senseHat.get_temperature()
 
     if(temperature > limitTemperature):
-        
+        print("max temp exceeded, waiting for next reading...")
         if(isContinued):
-            checkTemperature(sensorId)
+            print("The overpassed temperature is continuous, sending value to Blockchain...")
+            checkTemperature(temperature, sensorId)
         else:
             isContinued = True
 
