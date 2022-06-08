@@ -6,7 +6,10 @@ import sys
 
 def checkTemperature(temperature, sensorId):
     contract.functions.checkTemperature(int(temperature), sensorId).transact()
-    
+
+def getTemperatureValue(sensorId):
+    return contract.functions.getTemperatureValue(sensorId).call()
+
 def compile_contract(contract_path):
     with open(contract_path, 'r') as contract_file:
         code = contract_file.read()
@@ -27,14 +30,20 @@ account = '0x608c9f595EAAe822511a89AcE833Cf7865a49DB4'
 web3.eth.defaultAccount = account
 
 senseHat = SenseHat()
-limitTemperature = 0;
-isContinued = False;
 sensorId = 0;
+limitTemperature = getTemperatureValue(sensorId);
+previousLimitTemperature = getTemperatureValue(sensorId)
+isContinued = False;
 
+temperature = senseHat.get_temperature()
+print("Temperature limit set to", temperature)
 
 while True:
-    temperature = senseHat.get_temperature()
+    if previousLimitTemperature and getTemperatureValue(sensorId) != previousLimitTemperature:
+        limitTemperature = getTemperatureValue(sensorId)
+        print("Temperature updated")
 
+    temperature = senseHat.get_temperature()
     if(temperature > limitTemperature):
         print("max temp exceeded, waiting for next reading...")
         if(isContinued):
@@ -45,7 +54,4 @@ while True:
 
 
     print(temperature)
-    time.sleep(5)
-
-
-
+    time.sleep(15)
