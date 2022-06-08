@@ -14,7 +14,7 @@
     "hbs": "^4.2.0",
     "jquery": "^3.6.0",
     "solc": "^0.8.13",
-    "truffle": "^5.5.13",
+    "truffle": "^5.5.17",
     "truffle-hdwallet-provider": "^1.0.17",
     "web3": "^1.7.3"
   },
