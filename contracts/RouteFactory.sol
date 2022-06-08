@@ -179,7 +179,7 @@ contract RouteFactory {
         return (routes[_routeId], sensors[routes[_routeId].sensorId]);
     }
 
-    function getLimitTemperatureValue(uint _sensorId) public view returns(int){
+    function getTemperatureValue(uint _sensorId) public view returns(int){
         return sensors[_sensorId].limitTemperature;
     }
 }
