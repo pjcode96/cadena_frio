@@ -1,36 +1,57 @@
-import tkinter as Tkinter
-import wallet_operations as op
-from os.path import exists
+import time
+from web3 import Web3
+from solcx import compile_source
 
-private_key = None;
-account_address = None;
+def checkTemperature(temperature, routeId):
+  contract.functions.checkTemperature(temperature, routeId).transact()
 
-def createWallet():
-  walletData = op.createNewWallet()
-  private_key = walletData["private_key"]
-  account_address = walletData["account_address"]
+def getLimitTemperatureValue(sensorId):
+  prueba = contract.functions.getLimitTemperatureValue(sensorId).call()
+  return contract.functions.getLimitTemperatureValue(sensorId).call()
+    
+def compile_contract(contract_path):
+  with open(contract_path, 'r') as contract_file:
+    code = contract_file.read()
 
-def getWallet():
-  file_exists = exists("../private/private_key")
+  return compile_source(code)
 
-  if file_exists:
-    data = op.getPrivateKeyAndAccountAddressDataFromFiles()
-    private_key = data["private_key"]
-    account_address = data["account_address"]
-    print("Hola:", private_key, account_address)
+provider = Web3.HTTPProvider('http://localhost:7545')
+web3 = Web3(provider)
+address = '0x608c9f595EAAe822511a89AcE833Cf7865a49DB4';
+contract_address = '0xf8c138163595f78c2B29003Cb08AD7eaD8E0834E'
 
+contract_path = "/home/pj/Desktop/proyecto/cadena_frio/contracts/RouteFactory.sol"
+compiled_contract = compile_contract(contract_path)
+
+contract_interface = compiled_contract.popitem()
+
+abi = contract_interface[1]['abi']
+
+contract = web3.eth.contract(address=contract_address, abi=abi)
+
+account = '0x608c9f595EAAe822511a89AcE833Cf7865a49DB4'
+web3.eth.defaultAccount = account
+
+isContinued = False;
+routeId = 0;
+sensorId = 0;
+limitTemperature = getLimitTemperatureValue(sensorId);
+
+
+while True:
+  temperature = 10;
+
+  if(temperature > limitTemperature):
+    print("max temp exceeded, waiting for the next reading...")
+    if(isContinued):
+      print("Temperature limit continues to be exceeded, sending value to Blockchain...")
+      checkTemperature(temperature, routeId)
+    else:
+      isContinued = True
   else:
-    walletData = op.createNewWallet()
+    print("Temperature under limits")
+    isContinued = False
 
-
-
-top = Tkinter.Tk()
-
-# Buttons
-createNewWalletButton = Tkinter.Button(top,text="Create new wallet",command=createWallet)
-getWalletButton = Tkinter.Button(top,text="Get wallet",command=getWallet)
-
-createNewWalletButton.pack()
-getWalletButton.pack()
-
-top.mainloop()
+  print(temperature)
+  limitTemperature = getLimitTemperatureValue(sensorId)
+  time.sleep(5)

@@ -3,8 +3,8 @@ const Web3Contract = require('./Web3Contract.js');
 const url = require('url');
 const path = require('path');
 
-const contractAddress = "0x4e7b8Fe2c459141D4fc9AAD6b807cbaF0464ceEE"
-const address = "0x1421BB0212dF4865aF2a617A54F74Dbb2B081d9c"
+const contractAddress = "0x066f2FcffD038eB4C1D1bbBfe24ac831cb6Df6F8"
+const address = "0x608c9f595EAAe822511a89AcE833Cf7865a49DB4"
 
 const w3contract = new Web3Contract(contractAddress, address);
 
@@ -55,7 +55,6 @@ app.on('ready', () => {
 
 
     Menu.setApplicationMenu(Menu.buildFromTemplate(menu))
-    homeWindow.webContents.openDevTools()
     homeWindow.on('closed', () => {
         app.quit();
     });
@@ -212,8 +211,8 @@ ipcMain.on('get_alerts', (event, data) => {
             let alertList = [];
             let date;
             for (var i = 0; i < alerts.length; i++) {
-                date = new Date(parseInt(alerts[i].timestamp));
-                date = date.getDate() + "/" + date.getMonth() + "/" + date.getFullYear();
+                date = new Date(parseInt(alerts[i].timestamp*1000));
+                date = date.toLocaleString("es");
                 alertList.push({
                     date: date,
                     registeredTemperature: alerts[i].registeredTemperature,
@@ -250,7 +249,6 @@ function getSecondaryWindow(title, filepath) {
     secondaryWindow.on('closed', () => {
         secondaryWindow = null;
     });
-    secondaryWindow.webContents.openDevTools()
     return secondaryWindow;
 }
 
