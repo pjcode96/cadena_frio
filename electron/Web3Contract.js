@@ -39,7 +39,7 @@ class Web3Contract {
     }
 
     async setNewTemperatureValues(routeId, newLimitTemperature, newHigherTemperature, senderAddress) {
-        return this.contract.methods.setNewTemperatureValues(routeId, newLimitTemperature, newHigherTemperature).send({ from: senderAddress, gas: 150000, gasPrice: '3000' });
+        return this.contract.methods.setNewTemperatureValues(routeId, newLimitTemperature, newHigherTemperature).send({ from: senderAddress, gas: 2000000, gasPrice: '3000000000' });
     }
 
     // Getters
@@ -94,7 +94,7 @@ class Web3Contract {
         let compiled = JSON.parse(solc.compile(JSON.stringify(compileInfo)));
         fs.ensureDirSync(buildPath);
 
-        let ganache = new Web3.providers.HttpProvider("http://192.168.1.238:7545");
+        let ganache = new Web3.providers.HttpProvider("http://localhost:8545");
         let web3 = new Web3(ganache);
 
         // Here, we get the abi from contract
