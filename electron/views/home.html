@@ -14,7 +14,7 @@
 <body>
 
     <div class="container p-4 mb-3 mt-5">
-        <button class="btn btn-primary btn-block mt-2" onclick="goToHome(event)")>
+        <button class="btn btn-primary btn-block mt-2" onclick="goToHome(event)" )>
             Atrás
         </button>
         <div class="card">
@@ -61,68 +61,98 @@
         let createForm = document.querySelector('#create_route');
         let getForm = document.querySelector('#get_route');
 
-        debugger
         createForm.addEventListener('submit', (event) => {
 
             event.preventDefault();
 
-            let routeParams = {
-                sender: document.getElementById("sender").value,
-                receiver: document.getElementById("receiver").value,
-                currentManager: document.getElementById("currentManager").value,
-                destinationLatitude: document.getElementById("destinationLatitude").value,
-                destinationLongitude: document.getElementById("destinationLongitude").value,
-                limitTemperature: parseInt(document.getElementById("limitTemperature").value),
-                higherTemperature: parseInt(document.getElementById("higherTemperature").value)
-            }
+            if (document.getElementById("sender").value && document.getElementById("receiver").value
+                && document.getElementById("currentManager").value && document.getElementById("destinationLatitude").value
+                && document.getElementById("destinationLongitude").value && parseInt(document.getElementById("limitTemperature").value)
+                && parseInt(document.getElementById("higherTemperature").value)) {
 
-            let origin = event.currentTarget.id;
-            window.api.send(origin, routeParams);
+                let routeParams = {
+                    sender: document.getElementById("sender").value,
+                    receiver: document.getElementById("receiver").value,
+                    currentManager: document.getElementById("currentManager").value,
+                    destinationLatitude: document.getElementById("destinationLatitude").value,
+                    destinationLongitude: document.getElementById("destinationLongitude").value,
+                    limitTemperature: parseInt(document.getElementById("limitTemperature").value),
+                    higherTemperature: parseInt(document.getElementById("higherTemperature").value)
+                }
+                let origin = event.currentTarget.id;
+                window.api.send(origin, routeParams);
+            }else{
+                alert("You must set all creating fields")
+            }
         })
 
         getForm.addEventListener('submit', (event) => {
 
             event.preventDefault();
             let origin = event.currentTarget.id;
-            window.api.send('' + origin, getForm[0].value);
+            if(getForm[0].value){
+                window.api.send('' + origin, getForm[0].value);
+            }else{
+                alert("You must set route ID")
+            }
         })
 
 
         function checkTemperature(event) {
             event.preventDefault();
             let origin = event.currentTarget.id;
-            window.api.send("check_temperature", document.getElementById('check_temperature_value').value);
-            
+            if (document.getElementById('check_temperature_value').value && Number.isInteger(parseInt(document.getElementById('check_temperature_value').value))) {
+                window.api.send("check_temperature", document.getElementById('check_temperature_value').value);
+            } else {
+                alert("You must set a number in this field.")
+            }
         }
 
         function changeCurrentManager(event) {
             event.preventDefault();
             debugger
             let origin = event.currentTarget.id;
-            window.api.send("change_manager", document.getElementById('change_manager_address').value);
+            if (document.getElementById('change_manager_address').value) {
+                window.api.send("change_manager", document.getElementById('change_manager_address').value);
+            } else {
+                alert("You must set an account address")
+            }
         }
 
         function changeDestination(event) {
             event.preventDefault();
             let origin = event.currentTarget.id;
-            let destination = {
-                destinationLatitude: document.getElementById('change_destination_latitude').value,
-                destinationLongitude: document.getElementById('change_destination_longitude').value
+            if (document.getElementById('change_destination_latitude').value && document.getElementById('change_destination_longitude').value) {
+                let destination = {
+                    destinationLatitude: document.getElementById('change_destination_latitude').value,
+                    destinationLongitude: document.getElementById('change_destination_longitude').value
+                }
+                window.api.send("change_destination", destination);
+            } else {
+                alert("You must set latitude and longitude")
             }
-            window.api.send("change_destination", destination);
         }
 
         function changeTemperatureValues(event) {
             event.preventDefault();
             let origin = event.currentTarget.id;
-            let temperatures = {
-                limitTemperature: document.getElementById('change_limit_temperature').value,
-                higherTemperature: document.getElementById('change_higher_temperature').value
+
+            if (document.getElementById('change_limit_temperature').value && document.getElementById('change_higher_temperature').value
+                && document.getElementById('change_limit_temperature').value && Number.isInteger(parseInt(document.getElementById('change_limit_temperature').value))
+                && document.getElementById('change_higher_temperature').value && Number.isInteger(parseInt(document.getElementById('change_higher_temperature').value))) {
+
+                let temperatures = {
+                    limitTemperature: document.getElementById('change_limit_temperature').value,
+                    higherTemperature: document.getElementById('change_higher_temperature').value
+                }
+                window.api.send("change_temperatures", temperatures);
+
+            } else {
+                alert("You must set limit and higher temperatures")
             }
-            window.api.send("change_temperatures", temperatures);
         }
 
-        function goToHome(event){
+        function goToHome(event) {
             window.location.reload();
         }
 

@@ -3,7 +3,7 @@ const Web3Contract = require('./Web3Contract.js');
 const url = require('url');
 const path = require('path');
 
-const contractAddress = "0x26A29A5783070efB0013266BC9f5147B029b4260"
+const contractAddress = "0xE6Fa929Cde6580bf12337F453B0987d2B1997118"
 const address = "0xce287098d0f683d7b2053e949b64e1433d223639"
 
 const w3contract = new Web3Contract(contractAddress, address);

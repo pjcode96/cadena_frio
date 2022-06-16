@@ -103,7 +103,7 @@ contract RouteFactory {
 
         if (_temperature > sensor.limitTemperature) {
             if (_temperature > sensor.higherTemperature) {
-                sensor.higherTemperature = _temperature;
+                sensors[routes[_routeId].sensorId].higherTemperature = _temperature;
             }
             
             alerts.push(AlertRecord(block.timestamp, _temperature, currentManager));
