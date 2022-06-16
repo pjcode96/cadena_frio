@@ -13,7 +13,7 @@ def getTemperatureValue(sensorId):
 def getCurrentRouteManager(sensorId):
     return contract.functions.getCurrentRouteManager(sensorId).call()
 
-provider = Web3.HTTPProvider('http://192.168.1.239:8545')
+provider = Web3.HTTPProvider('http://127.0.0.1:8545')
 web3 = Web3(provider)
 sensorId = 0
 contract_address = '0xE6Fa929Cde6580bf12337F453B0987d2B1997118'
