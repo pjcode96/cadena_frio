@@ -94,8 +94,8 @@ class Web3Contract {
         let compiled = JSON.parse(solc.compile(JSON.stringify(compileInfo)));
         fs.ensureDirSync(buildPath);
 
-        let ganache = new Web3.providers.HttpProvider("http://192.168.1.239:8545");
-        let web3 = new Web3(ganache);
+        let provider = new Web3.providers.HttpProvider("http://127.0.0.1:8545");
+        let web3 = new Web3(provider);
 
         // Here, we get the abi from contract
         let { RouteFactory } = compiled.contracts["RouteFactory.sol"]
